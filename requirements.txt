@@ -1,3 +1,5 @@
-pandas
-matplotlib
-reportlab
+flake8
+pytest
+pytest-cov
+requests
+codecov
