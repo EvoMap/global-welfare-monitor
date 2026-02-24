@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - data_volume:/data
+    environment:
+      - DATA_DIR=/data
+    depends_on:
+      data_ingestion:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"] # Adjust the health endpoint
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  data_ingestion:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - data_volume:/data
+    environment:
+      - DATA_DIR=/data
+    command: ./src/run_ingestion.sh # Run the data ingestion script
+    depends_on:
+      api:
+        condition: service_healthy
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    volumes:
+      - data_volume:/data
+    environment:
+      - DATA_DIR=/data
+    command: streamlit run ./src/dashboard.py
+    depends_on:
+      - api
+
+volumes:
+  data_volume:
