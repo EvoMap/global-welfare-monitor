@@ -1,5 +1,7 @@
 fastapi
-uvicorn[standard]
+uvicorn
 pydantic
-python-dotenv
 requests
+python-dotenv
+streamlit
+# Add other dependencies here
