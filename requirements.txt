@@ -1,7 +1,3 @@
-fastapi
-uvicorn
-pydantic
+pandas
 requests
-python-dotenv
-streamlit
-# Add other dependencies here
+logging
