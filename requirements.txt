@@ -1,1 +1,3 @@
-pandasequests
+feedparser
+pandas
+requests
