@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 
 BASE_URL = "https://ghoapi.azureedge.net/api"
 INDICATORS = [
-    "WHOSIS_000001",
-    "MDG_0000000001",
-    "WHS9_95",
-    "WHS7_104",
-    "AIR_000004",
+    "WHOSIS_000001",   # life expectancy at birth
+    "MDG_0000000001",  # infant mortality rate
+    "MDG_0000000026",  # under-5 mortality rate
+    "NCDMORT3070",     # NCD mortality between 30-70
+    "SDGPM25",         # ambient air pollution (PM2.5)
 ]
 OUTPUT_DIR = "data/who"
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, "health_indicators.csv")

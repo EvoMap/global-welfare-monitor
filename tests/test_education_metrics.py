@@ -13,38 +13,51 @@ def edu():
 
 def test_fetch_data_success(edu):
     mock_resp = MagicMock()
-    mock_resp.json.return_value = [{"country": "USA", "year": 2020, "value": 99}]
+    mock_resp.json.return_value = {
+        "records": [{"indicatorId": "GER.1", "geoUnit": "USA", "year": 2020, "value": 99}],
+        "hints": [],
+    }
     mock_resp.raise_for_status = MagicMock()
 
     with patch("src.unesco_education.requests.get", return_value=mock_resp):
-        result = edu.fetch_data("data", params={"indicator": "TEST"})
+        result = edu.fetch_data("data/indicators", params={"indicator": "GER.1"})
     assert result is not None
-    assert len(result) == 1
+    assert "records" in result
 
 
 def test_fetch_data_network_error(edu):
     from requests.exceptions import ConnectionError as ReqConnectionError
     with patch("src.unesco_education.requests.get", side_effect=ReqConnectionError("timeout")):
-        result = edu.fetch_data("data")
+        result = edu.fetch_data("data/indicators")
     assert result is None
 
 
 def test_get_education_data_success(edu):
-    api_response = [
-        {"country": "USA", "year": 2020, "value": 95.0},
-        {"country": "CAN", "year": 2020, "value": 98.0},
-    ]
+    api_response = {
+        "records": [
+            {"indicatorId": "GER.1", "geoUnit": "USA", "year": 2020, "value": 99.5},
+            {"indicatorId": "LR.AG15T99", "geoUnit": "BRA", "year": 2020, "value": 93.2},
+            {"indicatorId": "OFST.1.CP", "geoUnit": "IND", "year": 2020, "value": 2500000},
+        ],
+        "hints": [],
+    }
     with patch.object(edu, "fetch_data", return_value=api_response):
         df = edu.get_education_data()
     assert df is not None
     assert isinstance(df, pd.DataFrame)
     assert "Country" in df.columns
     assert "Value" in df.columns
-    assert len(df) > 0
+    assert len(df) == 3
 
 
 def test_get_education_data_no_data(edu):
     with patch.object(edu, "fetch_data", return_value=None):
+        df = edu.get_education_data()
+    assert df is None
+
+
+def test_get_education_data_empty_records(edu):
+    with patch.object(edu, "fetch_data", return_value={"records": [], "hints": []}):
         df = edu.get_education_data()
     assert df is None
 

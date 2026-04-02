@@ -1,5 +1,6 @@
 """Fetches education access metrics from the UNESCO Institute for Statistics (UIS) API.
 
+Uses the UIS Data API v1 (api.uis.unesco.org/api/public/).
 Retrieves enrollment rates, literacy rates, and out-of-school children counts by country.
 Parses data into a standardized DataFrame, validates, and saves to data/unesco_education.csv.
 """
@@ -16,20 +17,26 @@ logger = logging.getLogger(__name__)
 MAX_RETRIES = 3
 RETRY_BACKOFF = 2
 
+UIS_API_BASE = "https://api.uis.unesco.org/api/public"
+
 
 class UNESCOEducationData:
     """Fetches, processes, and saves UNESCO education data."""
 
-    def __init__(self, api_url="http://api.uis.unesco.org/"):
-        self.api_url = api_url
+    def __init__(self, api_url=UIS_API_BASE):
+        self.api_url = api_url.rstrip("/")
         self.data = None
 
     def fetch_data(self, endpoint, params=None):
-        """Fetches data from the UNESCO API with retry."""
-        url = f"{self.api_url}{endpoint}"
+        """Fetches data from the UNESCO UIS API with retry."""
+        url = f"{self.api_url}/{endpoint}"
+        headers = {
+            "Accept": "application/json",
+            "Accept-Encoding": "gzip",
+        }
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                response = requests.get(url, params=params, timeout=30)
+                response = requests.get(url, params=params, headers=headers, timeout=60)
                 response.raise_for_status()
                 return response.json()
             except requests.exceptions.RequestException as e:
@@ -41,38 +48,50 @@ class UNESCOEducationData:
                     return None
 
     def get_education_data(self):
-        """Retrieves education data from the UNESCO API."""
+        """Retrieves education data from the UNESCO UIS API v1."""
         indicators = {
-            "UIS.NERA.1": "Enrollment Rate, Primary",
-            "UIS.LIT.A": "Literacy Rate, Adult",
-            "UIS.OOSC.1": "Out-of-School Children, Primary",
+            "GER.1": "Gross Enrollment Ratio, Primary",
+            "LR.AG15T99": "Adult Literacy Rate (15+)",
+            "OFST.1.CP": "Out-of-School Children, Primary",
         }
+
+        indicator_codes = list(indicators.keys())
+        params = [("indicator", code) for code in indicator_codes]
+
+        logger.info(f"Fetching {len(indicator_codes)} indicators from UIS API...")
+        data = self.fetch_data("data/indicators", params=params)
+
+        if not data:
+            logger.warning("No response from UIS API.")
+            return None
+
+        records = data.get("records", [])
+        if not records:
+            logger.warning("UIS API returned zero records.")
+            return None
+
         all_data = []
-        for indicator_code, indicator_name in indicators.items():
-            data = self.fetch_data("data", params={"indicator": indicator_code, "format": "json"})
-            if data:
-                for item in data:
-                    try:
-                        country = item.get("country")
-                        year = item.get("year")
-                        value = item.get("value")
-                        if country and year and value is not None:
-                            all_data.append({
-                                "Country": country,
-                                "Year": year,
-                                "Indicator": indicator_name,
-                                "Value": value,
-                            })
-                    except (TypeError, ValueError) as e:
-                        logger.warning(f"Skipping invalid data point: {item}. Error: {e}")
-            else:
-                logger.warning(f"No data received for indicator: {indicator_code}")
+        for rec in records:
+            indicator_id = rec.get("indicatorId", "")
+            indicator_name = indicators.get(indicator_id, indicator_id)
+            geo_unit = rec.get("geoUnit", "")
+            year = rec.get("year")
+            value = rec.get("value")
+
+            if geo_unit and year is not None and value is not None:
+                all_data.append({
+                    "Country": geo_unit,
+                    "Year": year,
+                    "Indicator": indicator_name,
+                    "Value": value,
+                })
 
         if not all_data:
             logger.warning("No education data retrieved from UNESCO API.")
             return None
 
         df = pd.DataFrame(all_data)
+        logger.info(f"Retrieved {len(df)} education data records from UIS API")
         self.data = df
         return df
 
