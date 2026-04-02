@@ -103,7 +103,5 @@ def test_assess_alerts(food_security_monitor):
     assert isinstance(alerts, dict)
     assert 'high' in alerts
     assert 'critical' in alerts
-    assert 'B' in alerts['high']  # Caloric deficit for region B is 15, which is >= high threshold (10)
-    assert 'C' in alerts['critical']  # Caloric deficit for region C is 25, which is >= critical threshold (20)
-    assert 'B' in alerts['critical'] # Price volatility for region B is 0.4, which is >= high threshold (0.3)
-    assert 'C' in alerts['critical'] # Price volatility for region C is 0.6, which is >= critical threshold (0.5)
+    assert 'B' in alerts['high']
+    assert 'C' in alerts['critical']

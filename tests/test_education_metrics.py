@@ -1,71 +1,72 @@
-import unittest
+"""Tests for unesco_education.py -- verifies UNESCO UIS data fetching and validation."""
+
+import pytest
 import pandas as pd
-from src.education_metrics import (
-    normalize_literacy_rate,
-    calculate_enrollment_ratio,
-    compute_gender_parity_index,
-    calculate_spending_efficiency,
-)
+from unittest.mock import patch, MagicMock
+from src.unesco_education import UNESCOEducationData
 
 
-class TestEducationMetrics(unittest.TestCase):
-
-    def setUp(self):
-        self.data = pd.DataFrame({
-            'region': ['A', 'A', 'B', 'B'],
-            'age_group': ['5-10', '11-15', '5-10', '11-15'],
-            'literacy_rate': [0.6, 0.8, 0.7, 0.9],
-            'population': [1000, 1200, 800, 900],
-            'enrolled': [600, 960, 560, 810],
-            'male_enrollment': [300, 480, 280, 405],
-            'female_enrollment': [300, 480, 280, 405],
-            'education_expenditure': [10000, 12000, 8000, 9000],
-            'test_scores': [60, 70, 55, 65]
-        })
-
-    def test_normalize_literacy_rate(self):
-        result = normalize_literacy_rate(self.data.copy(), 'age_group', 'region', 'literacy_rate')
-        self.assertIn('normalized_literacy_rate', result.columns)
-        self.assertTrue(all(0 <= val <= 1 for val in result['normalized_literacy_rate']))
-
-        # Test with missing column
-        data_missing_col = self.data.drop('literacy_rate', axis=1)
-        result_missing_col = normalize_literacy_rate(data_missing_col.copy(), 'age_group', 'region', 'literacy_rate')
-        self.assertNotIn('normalized_literacy_rate', result_missing_col.columns)
-
-    def test_calculate_enrollment_ratio(self):
-        result = calculate_enrollment_ratio(self.data.copy(), 'population', 'enrolled')
-        self.assertIn('enrollment_ratio', result.columns)
-        self.assertTrue(all(0 <= val <= 1 for val in result['enrollment_ratio']))
-
-        # Test with zero population
-        data_zero_pop = self.data.copy()
-        data_zero_pop.loc[0, 'population'] = 0
-        result_zero_pop = calculate_enrollment_ratio(data_zero_pop, 'population', 'enrolled')
-        self.assertEqual(result_zero_pop['enrollment_ratio'][0], 0)
-
-    def test_compute_gender_parity_index(self):
-        result = compute_gender_parity_index(self.data.copy(), 'male_enrollment', 'female_enrollment')
-        self.assertIn('gender_parity_index', result.columns)
-        self.assertTrue(all(val >= 0 for val in result['gender_parity_index']))
-
-        # Test with zero male enrollment
-        data_zero_male = self.data.copy()
-        data_zero_male.loc[0, 'male_enrollment'] = 0
-        result_zero_male = compute_gender_parity_index(data_zero_male, 'male_enrollment', 'female_enrollment')
-        self.assertEqual(result_zero_male['gender_parity_index'][0], 0)
-
-    def test_calculate_spending_efficiency(self):
-        result = calculate_spending_efficiency(self.data.copy(), 'education_expenditure', 'test_scores')
-        self.assertIn('spending_efficiency', result.columns)
-        self.assertTrue(all(val >= 0 for val in result['spending_efficiency']))
-
-        # Test with zero expenditure
-        data_zero_exp = self.data.copy()
-        data_zero_exp.loc[0, 'education_expenditure'] = 0
-        result_zero_exp = calculate_spending_efficiency(data_zero_exp, 'education_expenditure', 'test_scores')
-        self.assertEqual(result_zero_exp['spending_efficiency'][0], 0)
+@pytest.fixture
+def edu():
+    return UNESCOEducationData(api_url="http://mock-api/")
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_fetch_data_success(edu):
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = [{"country": "USA", "year": 2020, "value": 99}]
+    mock_resp.raise_for_status = MagicMock()
+
+    with patch("src.unesco_education.requests.get", return_value=mock_resp):
+        result = edu.fetch_data("data", params={"indicator": "TEST"})
+    assert result is not None
+    assert len(result) == 1
+
+
+def test_fetch_data_network_error(edu):
+    from requests.exceptions import ConnectionError as ReqConnectionError
+    with patch("src.unesco_education.requests.get", side_effect=ReqConnectionError("timeout")):
+        result = edu.fetch_data("data")
+    assert result is None
+
+
+def test_get_education_data_success(edu):
+    api_response = [
+        {"country": "USA", "year": 2020, "value": 95.0},
+        {"country": "CAN", "year": 2020, "value": 98.0},
+    ]
+    with patch.object(edu, "fetch_data", return_value=api_response):
+        df = edu.get_education_data()
+    assert df is not None
+    assert isinstance(df, pd.DataFrame)
+    assert "Country" in df.columns
+    assert "Value" in df.columns
+    assert len(df) > 0
+
+
+def test_get_education_data_no_data(edu):
+    with patch.object(edu, "fetch_data", return_value=None):
+        df = edu.get_education_data()
+    assert df is None
+
+
+def test_validate_data_valid(edu):
+    df = pd.DataFrame({"Country": ["USA"], "Year": [2020], "Indicator": ["Test"], "Value": [95.0]})
+    assert edu.validate_data(df) is True
+
+
+def test_validate_data_missing_values(edu):
+    df = pd.DataFrame({"Country": [None], "Year": [2020], "Indicator": ["Test"], "Value": [95.0]})
+    assert edu.validate_data(df) is False
+
+
+def test_validate_data_non_numeric_value(edu):
+    df = pd.DataFrame({"Country": ["USA"], "Year": [2020], "Indicator": ["Test"], "Value": ["abc"]})
+    assert edu.validate_data(df) is False
+
+
+def test_save_data(edu, tmp_path):
+    df = pd.DataFrame({"Country": ["USA"], "Year": [2020], "Indicator": ["Test"], "Value": [95.0]})
+    filepath = str(tmp_path / "test_edu.csv")
+    edu.save_data(df, filepath)
+    loaded = pd.read_csv(filepath)
+    assert len(loaded) == 1

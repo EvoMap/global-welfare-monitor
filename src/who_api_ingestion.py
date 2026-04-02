@@ -1,79 +1,90 @@
-"""
-This script ingests health indicators data from the WHO API, handles authentication,
-pagination, and error handling. It stores the data in a CSV file within the
-data/who directory.
+"""Ingests health indicators from the WHO Global Health Observatory (GHO) API.
+
+Handles pagination via OData @odata.nextLink and retries on transient failures.
+Stores results in data/who/health_indicators.csv.
 """
 
 import os
+import time
+import logging
 import requests
 import pandas as pd
 
-# Configuration
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger(__name__)
+
 BASE_URL = "https://ghoapi.azureedge.net/api"
 INDICATORS = [
-    "WHOSIS_000001",  # Life expectancy at birth
-    "MDG_0000000001",  # Infant mortality rate
-    "WHS9_95",  # Under-five mortality rate
-    "WHS7_104",  # Maternal mortality ratio (per 100,000 live births)
-    "AIR_000004"   # Probability of dying between 30 and 70 years from any of cardiovascular disease, cancer, diabetes, or chronic respiratory disease
+    "WHOSIS_000001",
+    "MDG_0000000001",
+    "WHS9_95",
+    "WHS7_104",
+    "AIR_000004",
 ]
 OUTPUT_DIR = "data/who"
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, "health_indicators.csv")
 
+MAX_RETRIES = 3
+RETRY_BACKOFF = 2
 
-def fetch_data(indicator_code):
-    """Fetches data for a specific indicator from the WHO API."""
+
+def fetch_data(indicator_code, max_retries=MAX_RETRIES):
+    """Fetches data for a specific indicator with retry and pagination support."""
     url = f"{BASE_URL}/{indicator_code}"
     all_data = []
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
-        data = response.json()
-        all_data.extend(data['value'])
 
-        # Handle pagination (if applicable - WHO API doesn't seem to use standard pagination)
-        # while data.get('nextLink'):
-        #     url = data['nextLink']
-        #     response = requests.get(url)
-        #     response.raise_for_status()
-        #     data = response.json()
-        #     all_data.extend(data['value'])
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            all_data.extend(data.get("value", []))
 
-        return all_data
+            next_link = data.get("@odata.nextLink")
+            while next_link:
+                response = requests.get(next_link, timeout=30)
+                response.raise_for_status()
+                data = response.json()
+                all_data.extend(data.get("value", []))
+                next_link = data.get("@odata.nextLink")
 
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching data for {indicator_code}: {e}")
-        return None
+            return all_data
+
+        except requests.exceptions.RequestException as e:
+            logger.warning(f"Attempt {attempt}/{max_retries} failed for {indicator_code}: {e}")
+            if attempt < max_retries:
+                time.sleep(RETRY_BACKOFF ** attempt)
+            else:
+                logger.error(f"All {max_retries} attempts failed for {indicator_code}")
+                return None
 
 
 def main():
-    """Main function to fetch data for all indicators and save to CSV."""
+    """Fetch data for all indicators and save to CSV."""
     all_indicators_data = []
 
     for indicator in INDICATORS:
-        print(f"Fetching data for {indicator}...")
+        logger.info(f"Fetching {indicator}...")
         data = fetch_data(indicator)
         if data:
-            # Add indicator code to each record for easier identification
             for record in data:
-                record['indicator'] = indicator
+                record["indicator"] = indicator
             all_indicators_data.extend(data)
+        else:
+            logger.warning(f"No data returned for {indicator}")
 
     if not all_indicators_data:
-        print("No data fetched. Exiting.")
+        logger.error("No data fetched from any indicator. Exiting.")
         return
 
-    # Convert to Pandas DataFrame and save to CSV
     df = pd.DataFrame(all_indicators_data)
-
-    # Ensure the output directory exists
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     try:
         df.to_csv(OUTPUT_FILE, index=False)
-        print(f"Data saved to {OUTPUT_FILE}")
+        logger.info(f"Data saved to {OUTPUT_FILE} ({len(df)} rows)")
     except Exception as e:
-        print(f"Error saving data to CSV: {e}")
+        logger.error(f"Error saving to CSV: {e}")
 
 
 if __name__ == "__main__":

@@ -11,6 +11,8 @@ REQUIRED_PACKAGES = [
     ("numpy", "numpy"),
     ("scipy", "scipy"),
     ("requests", "requests"),
+    ("feedparser", "feedparser"),
+    ("sklearn", "scikit-learn"),
 ]
 
 

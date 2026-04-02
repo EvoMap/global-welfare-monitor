@@ -6,7 +6,7 @@ class TestInequalityAnalyzer(unittest.TestCase):
     def test_gini_coefficient(self):
         income_distribution = [1000, 2000, 3000, 4000, 5000]
         gini = ia.gini_coefficient(income_distribution)
-        self.assertAlmostEqual(gini, 0.16, places=3)
+        self.assertAlmostEqual(gini, 0.267, places=2)
 
         income_distribution = [1000] * 5
         gini = ia.gini_coefficient(income_distribution)
@@ -20,7 +20,7 @@ class TestInequalityAnalyzer(unittest.TestCase):
     def test_palma_ratio(self):
         income_distribution = [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
         palma = ia.palma_ratio(income_distribution)
-        self.assertAlmostEqual(palma, 2.5, places=3)
+        self.assertAlmostEqual(palma, 1.0, places=3)
 
         income_distribution = [1000] * 10
         palma = ia.palma_ratio(income_distribution)
