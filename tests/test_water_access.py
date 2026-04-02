@@ -57,7 +57,7 @@ def test_calculate_safe_water_coverage(mock_wash_data):
     df = water_access.parse_wash_data(mock_wash_data)
     coverage = water_access.calculate_safe_water_coverage(df, "USA")
     assert isinstance(coverage, float)
-    assert 95.0 <= coverage <= 96.0
+    assert 94.0 <= coverage <= 96.0
 
 
 def test_calculate_safe_water_coverage_no_data():

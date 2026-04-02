@@ -1,102 +1,94 @@
-"""
-Fetches global food price data from the FAO Food Price Monitoring and Analysis (FPMA) API or FAOSTAT.
-Parses the data into a standardized DataFrame with columns: country, indicator, date, value, unit.
-Stores results in data/fao_food_prices.csv.
-Includes error handling and data validation.
+"""Fetches global food price data from the FAOSTAT API.
+
+Uses the FAOSTAT bulk download endpoint for Consumer Price Indices (CP domain).
+Parses data into a standardized DataFrame and stores results in data/fao_food_prices.csv.
 """
 
+import os
+import time
+import logging
 import pandas as pd
 import requests
-import os
 
-DATA_DIR = 'data'
-OUTPUT_FILE = os.path.join(DATA_DIR, 'fao_food_prices.csv')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger(__name__)
 
-# FAOSTAT API endpoint (example, may need adjustment based on specific data requirements)
-FAOSTAT_API_URL = 'http://fenixservices.fao.org/faostat/api/v1/en/data/CP'
+DATA_DIR = "data"
+OUTPUT_FILE = os.path.join(DATA_DIR, "fao_food_prices.csv")
+FAOSTAT_BULK_URL = "https://fenixservices.fao.org/faostat/static/bulkdownloads/ConsumerPriceIndices_E_All_Data_NOFLAG.csv.zip"
+MAX_RETRIES = 3
+RETRY_BACKOFF = 2
 
 
-def fetch_fao_food_prices(api_url=FAOSTAT_API_URL):
-    """Fetches food price data from the FAOSTAT API.
-
-    Args:
-        api_url (str): The URL of the FAOSTAT API.
-
-    Returns:
-        pandas.DataFrame: A DataFrame containing the fetched data, or None if an error occurred.
-    """
-    try:
-        response = requests.get(api_url)
-        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
-        data = response.json()['data']
-        return pd.DataFrame(data)
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching data from FAOSTAT API: {e}")
-        return None
-    except KeyError as e:
-        print(f"Error parsing JSON response: Missing key {e}")
-        return None
+def fetch_fao_food_prices(url=FAOSTAT_BULK_URL, max_retries=MAX_RETRIES):
+    """Fetches food price data from FAOSTAT bulk download."""
+    for attempt in range(1, max_retries + 1):
+        try:
+            logger.info(f"Downloading FAOSTAT data (attempt {attempt})...")
+            df = pd.read_csv(url, encoding="latin-1", low_memory=False)
+            logger.info(f"Downloaded {len(df)} rows from FAOSTAT")
+            return df
+        except Exception as e:
+            logger.warning(f"Attempt {attempt}/{max_retries} failed: {e}")
+            if attempt < max_retries:
+                time.sleep(RETRY_BACKOFF ** attempt)
+            else:
+                logger.error(f"All {max_retries} download attempts failed")
+                return None
 
 
 def standardize_data(df):
-    """Standardizes the DataFrame to the required format.
-
-    Args:
-        df (pandas.DataFrame): The DataFrame to standardize.
-
-    Returns:
-        pandas.DataFrame: The standardized DataFrame.
-    """
+    """Standardizes column names and selects relevant columns."""
     try:
-        # Rename columns (example, adjust based on actual column names)
-        df = df.rename(columns={
-            'Area': 'country',
-            'Item': 'indicator',
-            'Year': 'date',
-            'Value': 'value',
-            'Unit': 'unit'
-        })
+        rename_map = {}
+        for col in df.columns:
+            col_lower = col.strip().lower()
+            if col_lower == "area":
+                rename_map[col] = "country"
+            elif col_lower == "item":
+                rename_map[col] = "indicator"
+            elif col_lower == "year":
+                rename_map[col] = "date"
+            elif col_lower == "value":
+                rename_map[col] = "value"
+            elif col_lower == "unit":
+                rename_map[col] = "unit"
 
-        # Select relevant columns
-        df = df[['country', 'indicator', 'date', 'value', 'unit']]
+        df = df.rename(columns=rename_map)
 
-        # Convert date to datetime objects
-        df['date'] = pd.to_datetime(df['date'], format='%Y')
+        required = ["country", "indicator", "date", "value"]
+        missing = [c for c in required if c not in df.columns]
+        if missing:
+            logger.error(f"Missing required columns after rename: {missing}")
+            logger.info(f"Available columns: {list(df.columns)}")
+            return None
 
-        # Data validation (example)
-        if df['value'].isnull().any():
-            print("Warning: Missing values in 'value' column.")
+        keep = [c for c in ["country", "indicator", "date", "value", "unit"] if c in df.columns]
+        df = df[keep].copy()
+        df["value"] = pd.to_numeric(df["value"], errors="coerce")
+        df = df.dropna(subset=["value"])
+
+        if df["value"].isnull().any():
+            logger.warning("Missing values in 'value' column after coercion")
 
         return df
-    except KeyError as e:
-        print(f"Error: Required column not found: {e}")
-        return None
-    except ValueError as e:
-        print(f"Error converting data: {e}")
+    except Exception as e:
+        logger.error(f"Error standardizing data: {e}")
         return None
 
 
 def save_data(df, output_file=OUTPUT_FILE):
-    """Saves the DataFrame to a CSV file.
-
-    Args:
-        df (pandas.DataFrame): The DataFrame to save.
-        output_file (str): The path to the output CSV file.
-    """
+    """Saves the DataFrame to a CSV file."""
     try:
-        # Ensure the data directory exists
         os.makedirs(DATA_DIR, exist_ok=True)
         df.to_csv(output_file, index=False)
-        print(f"Data saved to {output_file}")
+        logger.info(f"Data saved to {output_file} ({len(df)} rows)")
     except OSError as e:
-        print(f"Error saving data to file: {e}")
-
-
-
+        logger.error(f"Error saving data: {e}")
 
 
 def main():
-    """Main function to fetch, standardize, and save FAO food price data."""
+    """Fetch, standardize, and save FAO food price data."""
     df = fetch_fao_food_prices()
     if df is not None:
         df = standardize_data(df)

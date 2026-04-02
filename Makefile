@@ -17,8 +17,7 @@ logs:
 	docker-compose logs -f
 
 test:
-	# Add your test commands here (e.g., pytest)
-	echo "No tests implemented yet."
+	python -m pytest tests/ -v
 
 rebuild:
 	docker-compose down && docker-compose build && docker-compose up -d

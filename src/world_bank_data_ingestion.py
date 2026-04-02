@@ -22,9 +22,14 @@ def fetch_world_bank_data(indicators, countries='all', mrnev=1):
     """
     try:
         data = wb.data.DataFrame(indicators, countries, mrnev=mrnev, numericTimeKeys=True)
-        data = data.stack().unstack(level=1)
-        data.index.names = ['country', 'year']
         data = data.reset_index()
+        rename_map = {}
+        if 'economy' in data.columns:
+            rename_map['economy'] = 'country'
+        if 'time' in data.columns:
+            rename_map['time'] = 'year'
+        if rename_map:
+            data = data.rename(columns=rename_map)
         return data
     except Exception as e:
         print(f"Error fetching data from World Bank API: {e}")

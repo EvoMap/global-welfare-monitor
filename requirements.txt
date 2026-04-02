@@ -1,3 +1,14 @@
 numpy
 pandas
 scipy
+python-dotenv
+wbgapi
+fastapi
+uvicorn
+pydantic
+requests
+streamlit
+feedparser
+scikit-learn
+matplotlib
+reportlab
