@@ -68,6 +68,7 @@ def publish():
     """Create or update datasets on HDX."""
     api_key = os.environ.get("HDX_API_KEY")
     hdx_site = os.environ.get("HDX_SITE", "stage")
+    org_name = os.environ.get("HDX_ORG_NAME", ORG_NAME)
 
     if not api_key:
         logger.error("HDX_API_KEY environment variable not set. Aborting.")
@@ -110,8 +111,8 @@ def publish():
                 "name": ds_config["name"],
                 "title": ds_config["title"],
                 "notes": ds_config["notes"],
-                "owner_org": ORG_NAME,
-                "maintainer": ORG_NAME,
+                "owner_org": org_name,
+                "maintainer": org_name,
                 "dataset_source": "EvoMap Global Welfare Monitor",
                 "methodology": "Registry",
                 "license_id": "cc-by",

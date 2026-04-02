@@ -29,17 +29,30 @@ jobs:
           DATA_DIR: ./data
         run: python -m src.data_ingestion
 
+      - name: Generate HXL-tagged datasets
+        env:
+          DATA_DIR: ./data
+        run: python -m src.reporting.generate_hdx_datasets
+
+      - name: Copy datasets to Pages site
+        run: |
+          mkdir -p docs/site/data
+          cp reports/hdx/*.hxl.csv docs/site/data/ 2>/dev/null || true
+          date -u +%Y-%m-%dT%H:%M:%SZ > docs/site/data/last-updated.txt
+
       - name: Upload data artifacts
         uses: actions/upload-artifact@v4
         with:
           name: welfare-data-${{ github.run_id }}
-          path: data/
+          path: |
+            data/
+            reports/hdx/
           retention-days: 90
 
-      - name: Commit data updates
+      - name: Commit data and site updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/ || true
+          git add -f data/ docs/site/data/ reports/hdx/ 2>/dev/null || true
           git diff --cached --quiet || git commit -m "chore: automated data ingestion $(date -u +%Y-%m-%d)"
           git push || true
