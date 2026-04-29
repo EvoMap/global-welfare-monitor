@@ -99,7 +99,7 @@ def compose_html_body():
 <h2 style="margin: 0 0 16px;">Global Welfare Monitor - Weekly Report</h2>
 <p>Generated: <strong>{now}</strong></p>
 <p>The following datasets have been updated and published to
-<a href="https://data.humdata.org/organization/evomap">HDX (Humanitarian Data Exchange)</a>.</p>
+<a href="https://data.humdata.org/dataset?q=evomap&sort=metadata_modified+desc">HDX (Humanitarian Data Exchange)</a>.</p>
 
 <table border="1" cellpadding="6" cellspacing="0"
        style="border-collapse:collapse; width:100%; font-size:14px;">
@@ -125,7 +125,7 @@ def compose_html_body():
 </ul>
 
 <p>Full datasets are available on
-<a href="https://data.humdata.org/organization/evomap">HDX</a> or the
+<a href="https://data.humdata.org/dataset?q=evomap&sort=metadata_modified+desc">HDX</a> or the
 <a href="https://evomap.github.io/global-welfare-monitor/">project dashboard</a>.</p>
 
 <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 24px 0;">

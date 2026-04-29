@@ -27,7 +27,7 @@ DATASETS = [
             "and health expenditure data sourced from the World Bank API. "
             "Updated weekly by the EvoMap Global Welfare Monitor pipeline."
         ),
-        "tags": ["economics", "gdp", "poverty", "world bank"],
+        "tags": ["economics", "gross domestic product-gdp", "poverty", "indicators"],
     },
     {
         "name": "evomap-global-health-indicators",
@@ -38,7 +38,7 @@ DATASETS = [
             "and NCD mortality data sourced from the WHO Global Health Observatory API. "
             "Updated weekly by the EvoMap Global Welfare Monitor pipeline."
         ),
-        "tags": ["health", "mortality", "who", "life expectancy"],
+        "tags": ["health", "mortality", "indicators", "disease"],
     },
     {
         "name": "evomap-disaster-alerts",
@@ -49,7 +49,7 @@ DATASETS = [
             "from the Global Disaster Alert and Coordination System RSS feed. "
             "Updated weekly by the EvoMap Global Welfare Monitor pipeline."
         ),
-        "tags": ["disasters", "earthquakes", "floods", "alerts"],
+        "tags": ["natural disasters", "earthquake-tsunami", "flooding", "hazards and risk"],
     },
     {
         "name": "evomap-food-price-indices",
@@ -59,9 +59,19 @@ DATASETS = [
             "Consumer food price indices sourced from FAOSTAT. "
             "Updated weekly by the EvoMap Global Welfare Monitor pipeline."
         ),
-        "tags": ["food", "prices", "fao", "food security"],
+        "tags": ["food security", "markets", "indicators", "agriculture-livestock"],
     },
 ]
+
+
+def _resolve_org(org_name):
+    """Check if the HDX organisation exists. Return name if found, else None."""
+    try:
+        from hdx.data.organization import Organization
+        org = Organization.read_from_hdx(org_name)
+        return org["name"] if org else None
+    except Exception:
+        return None
 
 
 def publish():
@@ -88,6 +98,15 @@ def publish():
         hdx_key=api_key,
     )
 
+    resolved_org = _resolve_org(org_name)
+    if resolved_org:
+        logger.info(f"Publishing under organisation: {resolved_org}")
+    else:
+        logger.warning(f"Organisation '{org_name}' not found on HDX. Publishing under personal account.")
+
+    created = 0
+    updated = 0
+
     for ds_config in DATASETS:
         filepath = os.path.join(HDX_OUTPUT_DIR, ds_config["file"])
         if not os.path.exists(filepath):
@@ -105,20 +124,26 @@ def publish():
             if resources:
                 resources[0].set_file_to_upload(filepath)
             existing.update_in_hdx()
+            updated += 1
         else:
             logger.info(f"Creating new dataset: {ds_config['name']}")
-            dataset = Dataset({
+            ds_fields = {
                 "name": ds_config["name"],
                 "title": ds_config["title"],
                 "notes": ds_config["notes"],
-                "owner_org": org_name,
-                "maintainer": org_name,
                 "dataset_source": "EvoMap Global Welfare Monitor",
                 "methodology": "Registry",
                 "license_id": "cc-by",
                 "data_update_frequency": "7",
                 "subnational": "0",
-            })
+                "private": False,
+            }
+
+            if resolved_org:
+                ds_fields["owner_org"] = resolved_org
+                ds_fields["maintainer"] = resolved_org
+
+            dataset = Dataset(ds_fields)
 
             for tag in ds_config["tags"]:
                 dataset.add_tag(tag)
@@ -136,10 +161,11 @@ def publish():
             try:
                 dataset.create_in_hdx(allow_no_resources=False)
                 logger.info(f"Created dataset: {ds_config['name']}")
+                created += 1
             except Exception as e:
                 logger.error(f"Failed to create {ds_config['name']}: {e}")
 
-    logger.info("HDX publishing complete")
+    logger.info(f"HDX publishing complete (created={created}, updated={updated})")
 
 
 if __name__ == "__main__":
