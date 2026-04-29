@@ -37,7 +37,6 @@ jobs:
         run: python -m src.reporting.publish_hdx
 
       - name: Send report email
-        if: ${{ secrets.MAIL_API_BASE_URL != '' }}
         env:
           MAIL_API_BASE_URL: ${{ secrets.MAIL_API_BASE_URL }}
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
