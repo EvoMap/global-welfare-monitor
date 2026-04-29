@@ -157,28 +157,31 @@ def send_report():
     subject = f"Global Welfare Monitor - Weekly Report ({now_date})"
     html_body = compose_html_body()
 
+    import requests as _req
+
     url = f"{base_url}/api/v1/mails/send"
     headers = {
         "Content-Type": "application/json",
         "X-API-Key": api_key,
     }
 
-    import urllib.request
-
     for recipient in recipients:
-        payload = json.dumps({
+        body = {
             "to": [recipient],
             "subject": subject,
             "body": html_body,
             "idempotency_key": str(uuid.uuid4()),
-        }).encode("utf-8")
-
-        req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
+        }
 
         try:
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                status = resp.status
-                logger.info(f"Email sent to {recipient} (status {status})")
+            resp = _req.post(url, json=body, headers=headers, timeout=15)
+            if resp.status_code in (200, 201, 202):
+                logger.info(f"Email sent to {recipient} (status {resp.status_code})")
+            else:
+                logger.error(
+                    f"Mail API returned {resp.status_code} for {recipient}: {resp.text[:200]}"
+                )
+                sys.exit(1)
         except Exception as e:
             logger.error(f"Failed to send email to {recipient}: {e}")
             sys.exit(1)
