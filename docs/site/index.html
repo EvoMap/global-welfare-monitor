@@ -102,18 +102,33 @@
     }
 
     .lang-switcher {
-      background: var(--bg-surface);
+      appearance: none;
+      -webkit-appearance: none;
+      background-color: transparent;
       color: var(--text-primary);
-      border: 1px solid var(--border);
-      padding: 6px 12px;
+      border: 1px solid transparent;
+      padding: 6px 32px 6px 12px;
       border-radius: 6px;
       font-family: 'Inter', sans-serif;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
+      font-weight: 500;
       cursor: pointer;
       outline: none;
       transition: all 0.2s ease;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2214%22%20height%3D%2214%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
     }
-    .lang-switcher:focus { border-color: var(--accent); }
+    
+    .lang-switcher:hover, .lang-switcher:focus { 
+      border-color: var(--border);
+      background-color: var(--bg-surface);
+    }
+    
+    .lang-switcher option {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+    }
 
     /* Typography */
     h1, h2, h3 {
@@ -374,7 +389,7 @@
         <span data-i18n="nav_title">Global Welfare Monitor</span>
       </div>
       <div>
-        <select id="lang-switcher" class="lang-switcher" onchange="setLanguage(this.value)">
+        <select id="lang-switcher" class="lang-switcher">
           <option value="en">English</option>
           <option value="zh">中文</option>
           <option value="fr">Français</option>
@@ -966,7 +981,7 @@
       }
     };
 
-    function setLanguage(lang) {
+    window.setLanguage = function(lang) {
       const dict = translations[lang];
       if (!dict) return;
       document.documentElement.lang = lang;
@@ -979,13 +994,19 @@
       });
       
       localStorage.setItem('gwm_lang', lang);
-    }
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       const savedLang = localStorage.getItem('gwm_lang') || navigator.language.slice(0, 2);
       const initialLang = translations[savedLang] ? savedLang : 'en';
-      document.getElementById('lang-switcher').value = initialLang;
-      setLanguage(initialLang);
+      const switcher = document.getElementById('lang-switcher');
+      
+      switcher.value = initialLang;
+      window.setLanguage(initialLang);
+      
+      switcher.addEventListener('change', (e) => {
+        window.setLanguage(e.target.value);
+      });
     });
   </script>
 </body>
