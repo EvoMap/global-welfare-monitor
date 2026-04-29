@@ -37,12 +37,9 @@ jobs:
         run: python -m src.reporting.publish_hdx
 
       - name: Send report email
-        if: ${{ env.SMTP_HOST != '' }}
+        if: ${{ secrets.MAIL_API_BASE_URL != '' }}
         env:
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          REPORT_FROM: ${{ vars.REPORT_FROM || 'noreply@evomap.ai' }}
+          MAIL_API_BASE_URL: ${{ secrets.MAIL_API_BASE_URL }}
+          MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
           REPORT_TO: ${{ vars.REPORT_TO || 'admin@evomap.ai' }}
         run: python -m src.reporting.email_report
