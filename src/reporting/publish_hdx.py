@@ -102,7 +102,12 @@ def publish():
     if resolved_org:
         logger.info(f"Publishing under organisation: {resolved_org}")
     else:
-        logger.warning(f"Organisation '{org_name}' not found on HDX. Publishing under personal account.")
+        logger.warning(
+            f"Organisation '{org_name}' not found on HDX. "
+            "HDX requires an approved organisation to publish datasets. "
+            "Skipping publish until the organisation is approved."
+        )
+        return
 
     created = 0
     updated = 0
@@ -131,6 +136,8 @@ def publish():
                 "name": ds_config["name"],
                 "title": ds_config["title"],
                 "notes": ds_config["notes"],
+                "owner_org": resolved_org,
+                "maintainer": resolved_org,
                 "dataset_source": "EvoMap Global Welfare Monitor",
                 "methodology": "Registry",
                 "license_id": "cc-by",
@@ -138,10 +145,6 @@ def publish():
                 "subnational": "0",
                 "private": False,
             }
-
-            if resolved_org:
-                ds_fields["owner_org"] = resolved_org
-                ds_fields["maintainer"] = resolved_org
 
             dataset = Dataset(ds_fields)
 
