@@ -23,9 +23,23 @@
       --nav-bg: rgba(255, 255, 255, 0.85);
     }
 
-    /* Auto Dark Mode based on system preference */
+    /* Dark Mode Variables */
+    :root[data-theme="dark"] {
+      --bg-base: #030712;
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --border: rgba(255, 255, 255, 0.1);
+      --success: #10b981;
+      --nav-bg: rgba(15, 23, 42, 0.85);
+    }
+
     @media (prefers-color-scheme: dark) {
-      :root {
+      :root:not([data-theme="light"]) {
         --bg-base: #030712;
         --bg-surface: #0f172a;
         --bg-card: #1e293b;
@@ -101,28 +115,77 @@
       gap: 8px;
     }
 
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-primary);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0;
+    }
+
+    .icon-btn:hover, .icon-btn:focus {
+      background-color: var(--bg-surface);
+      border-color: var(--border);
+    }
+
+    /* Light mode default */
+    .icon-btn .sun-icon { display: none; }
+    .icon-btn .moon-icon { display: block; }
+
+    /* Dark mode explicitly set */
+    :root[data-theme="dark"] .icon-btn .sun-icon { display: block; }
+    :root[data-theme="dark"] .icon-btn .moon-icon { display: none; }
+
+    /* Dark mode from media query (when not explicitly light) */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .icon-btn .sun-icon { display: block; }
+      :root:not([data-theme="light"]) .icon-btn .moon-icon { display: none; }
+    }
+
+    .lang-wrapper {
+      display: flex;
+      align-items: center;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding-left: 8px;
+      transition: all 0.2s ease;
+      color: var(--text-primary);
+    }
+
+    .lang-wrapper:hover, .lang-wrapper:focus-within {
+      background-color: var(--bg-surface);
+      border-color: var(--border);
+    }
+
     .lang-switcher {
       appearance: none;
       -webkit-appearance: none;
       background-color: transparent;
       color: var(--text-primary);
-      border: 1px solid transparent;
-      padding: 6px 32px 6px 12px;
-      border-radius: 6px;
+      border: none;
+      padding: 6px 28px 6px 8px;
       font-family: 'Inter', sans-serif;
       font-size: 0.85rem;
       font-weight: 500;
       cursor: pointer;
       outline: none;
-      transition: all 0.2s ease;
       background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2214%22%20height%3D%2214%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
       background-repeat: no-repeat;
-      background-position: right 10px center;
-    }
-    
-    .lang-switcher:hover, .lang-switcher:focus { 
-      border-color: var(--border);
-      background-color: var(--bg-surface);
+      background-position: right 8px center;
     }
     
     .lang-switcher option {
@@ -280,8 +343,9 @@
       border-color: var(--accent);
     }
     
+    :root[data-theme="dark"] .card:hover,
     @media (prefers-color-scheme: dark) {
-      .card:hover {
+      :root:not([data-theme="light"]) .card:hover {
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         border-color: rgba(255, 255, 255, 0.15);
       }
@@ -379,6 +443,12 @@
       .nav-content { flex-direction: column; height: auto; padding: 1rem 0; gap: 1rem; }
     }
   </style>
+  <script>
+    const savedTheme = localStorage.getItem('gwm_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+  </script>
 </head>
 <body>
 
@@ -388,22 +458,29 @@
         <img class="dna-icon" src="assets/evomap-icon.svg" alt="EvoMap" width="16" height="16"> 
         <span data-i18n="nav_title">Global Welfare Monitor</span>
       </div>
-      <div>
-        <select id="lang-switcher" class="lang-switcher">
-          <option value="en">English</option>
-          <option value="zh">中文</option>
-          <option value="fr">Français</option>
-          <option value="es">Español</option>
-          <option value="ru">Русский</option>
-          <option value="ar">العربية</option>
-        </select>
+      <div class="nav-controls">
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme">
+          <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+        <div class="lang-wrapper">
+          <svg class="globe-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+          <select id="lang-switcher" class="lang-switcher">
+            <option value="en">English</option>
+            <option value="zh">中文</option>
+            <option value="fr">Français</option>
+            <option value="es">Español</option>
+            <option value="ru">Русский</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
       </div>
     </div>
   </nav>
 
   <header class="hero">
     <div class="container">
-      <span class="subtitle"><img class="dna-icon" src="assets/evomap-icon.svg" alt="EvoMap" width="16" height="16"> <span data-i18n="subtitle_swarm">EvoMap Swarm Intelligence</span></span>
+      <span class="subtitle" data-i18n="subtitle_swarm">EvoMap Swarm Intelligence</span>
       <h1 data-i18n="hero_title">Global Welfare Monitor</h1>
       <p class="lead" data-i18n="hero_lead">An open-source, autonomous data pipeline aggregating human welfare indicators from authoritative global sources. Conceived, architected, and built entirely by AI agents.</p>
       
@@ -636,7 +713,7 @@
         dl2_desc: "WHO Observatory data on mortality and life expectancy.",
         dl3_title: "Disaster Alerts",
         dl3_desc: "GDACS real-time hazard alerts with geospatial coordinates.",
-        dl4_title": "Food Price Indices",
+        dl4_title: "Food Price Indices",
         dl4_desc: "FAOSTAT consumer food price indices across nations."
       },
       zh: {
@@ -997,6 +1074,7 @@
     };
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Language logic
       const savedLang = localStorage.getItem('gwm_lang') || navigator.language.slice(0, 2);
       const initialLang = translations[savedLang] ? savedLang : 'en';
       const switcher = document.getElementById('lang-switcher');
@@ -1006,6 +1084,30 @@
       
       switcher.addEventListener('change', (e) => {
         window.setLanguage(e.target.value);
+      });
+
+      // Theme toggle logic
+      const themeToggle = document.getElementById('theme-toggle');
+      const savedTheme = localStorage.getItem('gwm_theme');
+      
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      }
+      
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        let newTheme;
+        
+        if (currentTheme === 'dark') {
+          newTheme = 'light';
+        } else if (currentTheme === 'light') {
+          newTheme = 'dark';
+        } else {
+          newTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark';
+        }
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('gwm_theme', newTheme);
       });
     });
   </script>
