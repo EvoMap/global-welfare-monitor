@@ -1869,13 +1869,13 @@ CIV,1997,"Gross Enrollment Ratio, Primary",63.10916900634766
 CIV,1998,"Gross Enrollment Ratio, Primary",63.54455184936523
 CIV,1999,"Gross Enrollment Ratio, Primary",65.06746673583984
 CIV,2000,"Gross Enrollment Ratio, Primary",64.52948760986328
-CIV,2001,"Gross Enrollment Ratio, Primary",66.33512115478516
-CIV,2002,"Gross Enrollment Ratio, Primary",66.86859130859375
-CIV,2003,"Gross Enrollment Ratio, Primary",63.02391815185547
-CIV,2006,"Gross Enrollment Ratio, Primary",59.55504989624023
-CIV,2007,"Gross Enrollment Ratio, Primary",59.46311187744141
-CIV,2008,"Gross Enrollment Ratio, Primary",62.30046844482422
-CIV,2009,"Gross Enrollment Ratio, Primary",63.07928085327148
+CIV,2001,"Gross Enrollment Ratio, Primary",74.01663208007812
+CIV,2002,"Gross Enrollment Ratio, Primary",74.62220001220703
+CIV,2003,"Gross Enrollment Ratio, Primary",70.35856628417969
+CIV,2006,"Gross Enrollment Ratio, Primary",67.34394836425781
+CIV,2007,"Gross Enrollment Ratio, Primary",67.78173828125
+CIV,2008,"Gross Enrollment Ratio, Primary",71.45049285888672
+CIV,2009,"Gross Enrollment Ratio, Primary",70.4805679321289
 CIV,2011,"Gross Enrollment Ratio, Primary",73.56416372911143
 CIV,2012,"Gross Enrollment Ratio, Primary",78.28605858982273
 CIV,2013,"Gross Enrollment Ratio, Primary",80.74984632653607
@@ -12518,21 +12518,21 @@ SLV,2006,"Gross Enrollment Ratio, Primary",116.7658386230469
 SLV,2007,"Gross Enrollment Ratio, Primary",121.6941223144531
 SLV,2008,"Gross Enrollment Ratio, Primary",113.3913879394531
 SLV,2009,"Gross Enrollment Ratio, Primary",111.7232894897461
-SLV,2010,"Gross Enrollment Ratio, Primary",111.703523728467
-SLV,2011,"Gross Enrollment Ratio, Primary",110.5583146958385
-SLV,2012,"Gross Enrollment Ratio, Primary",109.439958408779
-SLV,2013,"Gross Enrollment Ratio, Primary",107.7560090209893
-SLV,2014,"Gross Enrollment Ratio, Primary",106.2347502512128
-SLV,2015,"Gross Enrollment Ratio, Primary",104.0565274162481
-SLV,2016,"Gross Enrollment Ratio, Primary",101.8439302285789
-SLV,2017,"Gross Enrollment Ratio, Primary",98.31384636878826
-SLV,2018,"Gross Enrollment Ratio, Primary",96.80149483402946
-SLV,2019,"Gross Enrollment Ratio, Primary",91.62740974824666
-SLV,2020,"Gross Enrollment Ratio, Primary",90.65794256633951
-SLV,2021,"Gross Enrollment Ratio, Primary",89.08187740598163
-SLV,2022,"Gross Enrollment Ratio, Primary",89.13040895020468
-SLV,2023,"Gross Enrollment Ratio, Primary",90.88372134691879
-SLV,2024,"Gross Enrollment Ratio, Primary",89.88040825885606
+SLV,2010,"Gross Enrollment Ratio, Primary",111.7035217285156
+SLV,2011,"Gross Enrollment Ratio, Primary",110.5583114624023
+SLV,2012,"Gross Enrollment Ratio, Primary",109.4399566650391
+SLV,2013,"Gross Enrollment Ratio, Primary",108.3572769165039
+SLV,2014,"Gross Enrollment Ratio, Primary",106.8142929077148
+SLV,2015,"Gross Enrollment Ratio, Primary",104.5427169799805
+SLV,2016,"Gross Enrollment Ratio, Primary",102.2590408325195
+SLV,2017,"Gross Enrollment Ratio, Primary",98.69180297851562
+SLV,2018,"Gross Enrollment Ratio, Primary",97.12610626220703
+SLV,2019,"Gross Enrollment Ratio, Primary",91.96985626220703
+SLV,2020,"Gross Enrollment Ratio, Primary",90.78333282470703
+SLV,2021,"Gross Enrollment Ratio, Primary",89.325439453125
+SLV,2022,"Gross Enrollment Ratio, Primary",89.28309631347656
+SLV,2023,"Gross Enrollment Ratio, Primary",91.06005859375
+SLV,2024,"Gross Enrollment Ratio, Primary",90.1230697631836
 SMR,1971,"Gross Enrollment Ratio, Primary",96.46851348876953
 SMR,1972,"Gross Enrollment Ratio, Primary",95.27649688720703
 SMR,1973,"Gross Enrollment Ratio, Primary",95.5164566040039
@@ -23349,6 +23349,11 @@ QAT,2011,Adult Literacy Rate (15+),96.41000366210938
 QAT,2012,Adult Literacy Rate (15+),96.68000030517578
 QAT,2013,Adult Literacy Rate (15+),97.4800033569336
 QAT,2014,Adult Literacy Rate (15+),97.75
+QAT,2016,Adult Literacy Rate (15+),98.5199966430664
+QAT,2017,Adult Literacy Rate (15+),98.77999877929688
+QAT,2022,Adult Literacy Rate (15+),99.29000091552734
+QAT,2023,Adult Literacy Rate (15+),99.30000305175781
+QAT,2024,Adult Literacy Rate (15+),99.31999969482422
 REU,1982,Adult Literacy Rate (15+),78.61000061035156
 ROU,1992,Adult Literacy Rate (15+),96.70999908447266
 ROU,2002,Adult Literacy Rate (15+),97.30000305175781
@@ -28523,10 +28528,10 @@ CIV,1996,"Out-of-School Children, Primary",1377153.0
 CIV,1997,"Out-of-School Children, Primary",1404733.0
 CIV,1999,"Out-of-School Children, Primary",1462823.0
 CIV,2000,"Out-of-School Children, Primary",1525605.0
-CIV,2001,"Out-of-School Children, Primary",1456005.0
-CIV,2002,"Out-of-School Children, Primary",1485974.0
-CIV,2003,"Out-of-School Children, Primary",1649807.0
-CIV,2009,"Out-of-School Children, Primary",1923994.0
+CIV,2001,"Out-of-School Children, Primary",1135775.0
+CIV,2002,"Out-of-School Children, Primary",1157141.0
+CIV,2003,"Out-of-School Children, Primary",1311355.0
+CIV,2009,"Out-of-School Children, Primary",1527222.0
 CIV,2013,"Out-of-School Children, Primary",1281399.0
 CIV,2014,"Out-of-School Children, Primary",1121305.0
 CIV,2015,"Out-of-School Children, Primary",1076358.0
@@ -28931,13 +28936,13 @@ DZA,1999,"Out-of-School Children, Primary",299322.0
 DZA,2000,"Out-of-School Children, Primary",234331.0
 DZA,2001,"Out-of-School Children, Primary",121093.0
 DZA,2002,"Out-of-School Children, Primary",48953.0
-DZA,2003,"Out-of-School Children, Primary",32507.0
-DZA,2004,"Out-of-School Children, Primary",35228.0
-DZA,2005,"Out-of-School Children, Primary",19989.0
+DZA,2003,"Out-of-School Children, Primary",32506.673828125
+DZA,2004,"Out-of-School Children, Primary",35227.671875
+DZA,2005,"Out-of-School Children, Primary",19989.302734375
 DZA,2006,"Out-of-School Children, Primary",33290.0
 DZA,2007,"Out-of-School Children, Primary",60232.0
 DZA,2008,"Out-of-School Children, Primary",43899.0
-DZA,2009,"Out-of-School Children, Primary",31857.0
+DZA,2009,"Out-of-School Children, Primary",31857.08984375
 DZA,2010,"Out-of-School Children, Primary",31549.76121313125
 DZA,2011,"Out-of-School Children, Primary",24696.32169665489
 DZA,2012,"Out-of-School Children, Primary",20411.0809684433
@@ -32376,17 +32381,17 @@ SLV,2000,"Out-of-School Children, Primary",100163.0
 SLV,2001,"Out-of-School Children, Primary",83326.0
 SLV,2002,"Out-of-School Children, Primary",57367.0
 SLV,2003,"Out-of-School Children, Primary",45093.0
-SLV,2014,"Out-of-School Children, Primary",46479.0
-SLV,2015,"Out-of-School Children, Primary",51888.0
-SLV,2016,"Out-of-School Children, Primary",57212.0
-SLV,2017,"Out-of-School Children, Primary",84737.0
-SLV,2018,"Out-of-School Children, Primary",79271.0
-SLV,2019,"Out-of-School Children, Primary",97817.0
-SLV,2020,"Out-of-School Children, Primary",100432.0
-SLV,2021,"Out-of-School Children, Primary",106135.0
+SLV,2014,"Out-of-School Children, Primary",46334.0
+SLV,2015,"Out-of-School Children, Primary",51792.0
+SLV,2016,"Out-of-School Children, Primary",57130.0
+SLV,2017,"Out-of-School Children, Primary",84578.0
+SLV,2018,"Out-of-School Children, Primary",79203.0
+SLV,2019,"Out-of-School Children, Primary",96990.0
+SLV,2020,"Out-of-School Children, Primary",100409.0
+SLV,2021,"Out-of-School Children, Primary",105939.0
 SLV,2022,"Out-of-School Children, Primary",105097.0
 SLV,2023,"Out-of-School Children, Primary",95913.0
-SLV,2024,"Out-of-School Children, Primary",57338.90894998144
+SLV,2024,"Out-of-School Children, Primary",101024.0
 SMR,1979,"Out-of-School Children, Primary",105.0
 SMR,1980,"Out-of-School Children, Primary",83.0
 SMR,1981,"Out-of-School Children, Primary",71.0
