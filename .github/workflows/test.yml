@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.CI_LABEL_LINUX_X64) }}
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
